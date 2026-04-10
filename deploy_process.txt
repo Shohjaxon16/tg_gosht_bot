@@ -1,0 +1,33 @@
+# GitHub va Netlify orqali Onlayn Do'konni ishga tushirish
+
+Ushbu qo'llanma sizga tayyorlangan Vue.js ilovasini internetga chiqarishga yordam beradi.
+
+### 1-qadam: GitHub'ga yuklash
+1. GitHub hisobingizga kiring va yangi repository yarating (masalan, `tg-onlayn-dokon`).
+2. Terminalda `TG_DOKON` papkasiga kiring va quyidagi buyruqlarni bajaring:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git remote add origin https://github.com/SIZNING_USERNAMINGIZ/REPOSITORY_NOMI.git
+   git push -u origin main
+   ```
+
+### 2-qadam: Netlify'ga ulash
+1. [Netlify.com](https://www.netlify.com/) saytiga kiring va GitHub orqali ro'yxatdan o'ting.
+2. **"Add new site"** -> **"Import an existing project"** ni tanlang.
+3. GitHub-ni tanlang va yangi ochgan repository-ingizni tanlang.
+4. **Build settings** qismida quyidagilar turganiga ishonch hosil qiling:
+   - Build command: `npm run build`
+   - Publish directory: `dist`
+5. **"Deploy site"** tugmasini bosing.
+
+### 3-qadam: Botni yangilash
+1. Netlify sizga bergan HTTPS manzilni nusxalab oling (masalan, `https://your-site.netlify.app`).
+2. `LOYIHA_1/keyboards/reply_kb.py` faylini oching.
+3. `url="https://YOUR_NETLIFY_URL.netlify.app/"` qismini o'zingizning Netlify manzilingiz bilan almashtiring.
+4. Botni qayta ishga tushiring.
+
+### Muhim eslatma:
+Bot ma'lumotlarni qabul qilishi uchun `ADMIN_ID` to'g'ri sozlangan bo'lishi shart. Uni `.env` faylida tekshirib ko'ring.
