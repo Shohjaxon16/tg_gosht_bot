@@ -7,8 +7,8 @@ import BottomCart from './components/BottomCart.vue'
 import CartModal from './components/CartModal.vue'
 import { products as initialProducts } from './data/products'
 
-const categories = ['SOMSA', 'LAVASH', 'SHOURMA', 'BURGER']
-const activeCategory = ref('SOMSA')
+const categories = ['KOLBASALAR', 'LAVASH', 'SHOURMA', 'BURGER']
+const activeCategory = ref('KOLBASALAR')
 const isCartOpen = ref(false)
 
 const products = ref(initialProducts)

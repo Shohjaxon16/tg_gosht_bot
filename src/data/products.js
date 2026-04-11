@@ -1,17 +1,17 @@
 export const products = [
   { 
     id: 1, 
-    name: "GO'SHTLI SOMSA", 
-    price: 12000, 
-    category: 'SOMSA', 
-    image: 'https://media-cdn.tripadvisor.com/media/photo-s/17/84/8f/33/caption.jpg' 
+    name: "MAXAM KOLBASA", 
+    price: 65000, 
+    category: 'KOLBASALAR', 
+    image: '/kolbasa.png' 
   },
   { 
     id: 2, 
-    name: "SIRLI SOMSA", 
-    price: 15000, 
-    category: 'SOMSA', 
-    image: 'https://www.gazeta.uz/media/img/2019/02/ZfXv9H15502287431268_l.jpg' 
+    name: "HALOL SOSISKA", 
+    price: 45000, 
+    category: 'KOLBASALAR', 
+    image: '/sosiska.png' 
   },
   { 
     id: 3, 

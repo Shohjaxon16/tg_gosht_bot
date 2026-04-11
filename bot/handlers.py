@@ -1,7 +1,7 @@
 import json
 import os
 from aiogram import Router, F, Bot
-from aiogram.types import Message, CallbackQuery, FSFile, InputMediaPhoto
+from aiogram.types import Message, CallbackQuery, FSInputFile, InputMediaPhoto
 from aiogram.filters import CommandStart
 from bot.keyboards import get_status_keyboard, get_templates_keyboard, get_webapp_keyboard
 
@@ -11,8 +11,8 @@ router = Router()
 async def cmd_start(message: Message):
     """Start buyrug'i - Media Group va Mini App tugmasini yuboradi"""
     # Rasmlar yo'llari
-    photo1 = FSFile("bot/assets/kolbasa.png")
-    photo2 = FSFile("bot/assets/sosiska.png")
+    photo1 = FSInputFile("bot/assets/kolbasa.png")
+    photo2 = FSInputFile("bot/assets/sosiska.png")
     
     # Media guruhi
     media = [
