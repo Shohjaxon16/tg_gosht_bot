@@ -45,37 +45,65 @@ async def cmd_start(message: Message):
 async def handle_webapp_data(message: Message, bot: Bot):
     """Mini Appdan kelgan buyurtmani qayta ishlash"""
     try:
-        data = json.loads(message.web_app_data.data)
-        items = data.get('items', []) # App.vue dagi nomga moslab
-        total = data.get('total', 0)
+        # Xom ma'lumotni loglash (muvaffaqiyatsiz bo'lsa tekshirish uchun)
+        raw_data = message.web_app_data.data
+        logger.info(f"Raw WebApp data: {raw_data}")
         
+        data = json.loads(raw_data)
+        items = data.get('items', [])
+        total = data.get('total', 0)
+        user_info = data.get('user', {})
+        
+        # Buyurtma matnini shakllantirish
         order_text = (
             f"🆕 <b>Yangi Buyurtma!</b>\n\n"
-            f"👤 <b>Mijoz:</b> {message.from_user.full_name}\n"
+            f"👤 <b>Mijoz:</b> {user_info.get('name', message.from_user.full_name)}\n"
+            f"📞 <b>Tel:</b> <code>{user_info.get('phone', '-')}</code>\n"
+            f"📍 <b>Manzil:</b> {user_info.get('address', '-')}\n"
             f"🆔 <b>User ID:</b> <code>{message.from_user.id}</code>\n\n"
             f"🛒 <b>Mahsulotlar:</b>\n"
         )
         
         for item in items:
-            order_text += f"• {item['name']} x{item['quantity']} - {item['price']:,} so'm\n"
+            name = item.get('name', 'Noma\'lum')
+            qty = item.get('quantity', 1)
+            price = item.get('price', 0)
             
-        order_text += f"\n💰 <b>Jami: {total:,} so'm</b>"
+            # Narxni xavfsiz formatlash
+            try:
+                price_fmt = f"{int(price):,}"
+            except:
+                price_fmt = str(price)
+                
+            order_text += f"• {name} x{qty} - {price_fmt} so'm\n"
+            
+        # Jami summani xavfsiz formatlash
+        try:
+            total_fmt = f"{int(total):,}"
+        except:
+            total_fmt = str(total)
+            
+        order_text += f"\n💰 <b>Jami: {total_fmt} so'm</b>"
 
         # Kanalga yuborish
         channel_id = os.getenv("CHANNEL_ID")
         if channel_id:
-            await bot.send_message(
-                chat_id=channel_id,
-                text=order_text,
-                reply_markup=get_status_keyboard(message.from_user.id)
-            )
+            try:
+                await bot.send_message(
+                    chat_id=channel_id,
+                    text=order_text,
+                    reply_markup=get_status_keyboard(message.from_user.id)
+                )
+            except Exception as channel_err:
+                logger.error(f"Kanalga yuborishda xato: {channel_err}")
+                # Kanalga keta olmasa ham foydalanuvchiga xabar beramiz
             
         await message.answer("Sizning buyurtmangiz qabul qilindi! ✅\nTez orada aloqaga chiqamiz.")
-        logger.info(f"Order received from {message.from_user.id}")
+        logger.info(f"Order successfully processed for {message.from_user.id}")
         
     except Exception as e:
-        logger.error(f"Error handling webapp data: {e}")
-        await message.answer("⚠️ Buyurtmani qayta ishlashda xatolik yuz berdi.")
+        logger.error(f"Epic fail in handle_webapp_data: {e}", exc_info=True)
+        await message.answer("⚠️ Buyurtmani qayta ishlashda kutilmagan xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring yoki administratorga murojaat qiling.")
 
 @router.callback_query(F.data.startswith("status_select:"))
 async def select_status(callback: CallbackQuery):
