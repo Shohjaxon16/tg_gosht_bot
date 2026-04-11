@@ -10,9 +10,7 @@ import { products as initialProducts } from './data/products'
 const categories = ['KOLBASALAR', 'LAVASH', 'SHOURMA', 'BURGER']
 const activeCategory = ref('KOLBASALAR')
 const isCartOpen = ref(false)
-
 const products = ref(initialProducts)
-
 const cart = ref([])
 
 const filteredProducts = computed(() => {
@@ -20,49 +18,50 @@ const filteredProducts = computed(() => {
 })
 
 const cartTotal = computed(() => {
-  return cart.value.reduce((total, item) => total + (item.price * item.quantity), 0)
+  return cart.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+})
+
+const cartCount = computed(() => {
+  return cart.value.reduce((sum, item) => sum + item.quantity, 0)
 })
 
 const addToCart = (product) => {
-  const existing = cart.value.find(item => item.id === product.id)
-  if (existing) {
-    existing.quantity++
+  const existingItem = cart.value.find(item => item.id === product.id)
+  if (existingItem) {
+    existingItem.quantity++
   } else {
     cart.value.push({ ...product, quantity: 1 })
   }
-  
-  if (window.Telegram?.WebApp?.HapticFeedback) {
-    window.Telegram.WebApp.HapticFeedback.impactOccurred('light')
-  }
 }
 
-const updateQuantity = (id, delta) => {
-  const item = cart.value.find(item => item.id === id)
+const updateQuantity = (productId, change) => {
+  const item = cart.value.find(p => p.id === productId)
   if (item) {
-    item.quantity += delta
+    item.quantity += change
     if (item.quantity <= 0) {
-      cart.value = cart.value.filter(i => i.id !== id)
+      cart.value = cart.value.filter(p => p.id !== productId)
     }
   }
 }
 
 const handleCheckout = (orderData) => {
   if (window.Telegram?.WebApp) {
-    // Send data to bot and close Mini App
+    // Buyurtmani botga yuborish va do'konni yopish
     window.Telegram.WebApp.sendData(JSON.stringify(orderData))
     window.Telegram.WebApp.close()
   } else {
     console.log("Order Data:", orderData)
-    alert("Buyurtmangiz qabul qilindi (Demo modeda)")
+    alert("Buyurtmangiz qabul qilindi (Demo)")
   }
 }
 
 onMounted(() => {
   if (window.Telegram?.WebApp) {
-    window.Telegram.WebApp.ready()
-    window.Telegram.WebApp.expand()
-    window.Telegram.WebApp.setHeaderColor('#ffffff')
-    window.Telegram.WebApp.setBackgroundColor('#f7f9fc')
+    const tg = window.Telegram.WebApp
+    tg.ready()
+    tg.expand()
+    tg.setHeaderColor('#ffffff')
+    tg.setBackgroundColor('#f7f9fc')
   }
 })
 </script>
@@ -70,19 +69,14 @@ onMounted(() => {
 <template>
   <div class="app-container">
     <Header />
-    <CategoryTabs 
-      :categories="categories" 
-      :activeCategory="activeCategory"
-      @change-category="activeCategory = $event"
-    />
     
-    <main class="content">
-      <div class="category-title">
-        <h2>{{ activeCategory }}</h2>
-        <div class="underline"></div>
-      </div>
+    <main>
+      <CategoryTabs 
+        :categories="categories" 
+        v-model="activeCategory" 
+      />
       
-      <div class="product-grid">
+      <div class="products-grid">
         <ProductCard 
           v-for="product in filteredProducts" 
           :key="product.id" 
@@ -93,7 +87,9 @@ onMounted(() => {
     </main>
 
     <BottomCart 
-      :total="cartTotal" 
+      v-if="cartCount > 0"
+      :count="cartCount"
+      :total="cartTotal"
       @open-cart="isCartOpen = true"
     />
 
@@ -113,34 +109,20 @@ onMounted(() => {
 
 .app-container {
   padding-bottom: 80px;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #f7f9fc;
 }
 
-.content {
+main {
   padding: 16px;
 }
 
-.category-title {
-  margin-bottom: 16px;
-}
-
-.category-title h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--text-color);
-}
-
-.category-title .underline {
-  width: 40px;
-  height: 3px;
-  background-color: var(--primary-color);
-  margin-top: 4px;
-  border-radius: 2px;
-}
-
-.product-grid {
+.products-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
+  margin-top: 16px;
 }
 </style>

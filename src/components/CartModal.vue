@@ -36,9 +36,9 @@ const submitOrder = () => {
 
 <template>
   <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
-    <div class="modal-content fade-in">
+    <div class="modal-content animate-slide-up">
       <div class="modal-header">
-        <h3>Savatcha</h3>
+        <h3>Savat</h3>
         <button class="close-btn" @click="$emit('close')">&times;</button>
       </div>
 
@@ -56,23 +56,25 @@ const submitOrder = () => {
           </div>
         </div>
       </div>
+      
       <div v-else class="empty-cart">
-        <p>Savatchangiz hozircha bo'sh</p>
+        <p>Savatchangiz bo'sh</p>
       </div>
 
       <div class="checkout-form" v-if="cart.length > 0">
-        <h4>Ma'lumotlaringiz:</h4>
-        <input v-model="name" type="text" placeholder="Ismingiz" required />
-        <input v-model="phone" type="tel" placeholder="Telefon raqamingiz" required />
-        <textarea v-model="address" placeholder="Yetkazib berish manzili" required></textarea>
+        <h4>Ma'lumotlar:</h4>
+        <input v-model="name" type="text" placeholder="Ism" />
+        <input v-model="phone" type="tel" placeholder="Telefon" />
+        <textarea v-model="address" placeholder="Manzil"></textarea>
         
         <div class="summary">
-          <span>Umumiy:</span>
+          <span>Jami:</span>
           <strong>{{ total.toLocaleString() }} so'm</strong>
         </div>
         
         <button 
           class="submit-btn" 
+          :disabled="!isFormValid"
           @click="submitOrder"
         >
           Buyurtmani tasdiqlash
@@ -89,23 +91,30 @@ const submitOrder = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-end;
   z-index: 1000;
-  max-width: 500px;
-  margin: 0 auto;
 }
 
 .modal-content {
   background: white;
   width: 100%;
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
-  max-height: 90vh;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  max-height: 85vh;
   overflow-y: auto;
-  padding: 24px;
-  padding-bottom: 40px;
+  padding: 20px;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 .modal-header {
@@ -117,19 +126,17 @@ const submitOrder = () => {
 
 .modal-header h3 {
   margin: 0;
-  color: var(--primary-color);
+  color: #333;
 }
 
 .close-btn {
-  background: none;
+  background: #f1f3f5;
   border: none;
-  font-size: 28px;
-  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 20px;
   cursor: pointer;
-}
-
-.cart-items {
-  margin-bottom: 24px;
 }
 
 .cart-item {
@@ -137,102 +144,73 @@ const submitOrder = () => {
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #f1f3f5;
 }
 
 .cart-item img {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 8px;
   object-fit: cover;
 }
 
-.item-details {
-  flex: 1;
-}
-
-.item-details h4 {
-  margin: 0;
-  font-size: 14px;
-}
-
-.item-details p {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--primary-color);
-  font-weight: 600;
-}
+.item-details { flex: 1; }
+.item-details h4 { margin: 0; font-size: 14px; }
+.item-details p { margin: 2px 0 0; color: #ff5722; font-weight: 600; font-size: 14px; }
 
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #f1f3f5;
-  padding: 4px;
+  gap: 10px;
+  background: #f8f9fa;
+  padding: 4px 8px;
   border-radius: 20px;
 }
 
 .quantity-controls button {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
   border: none;
-  background: white;
-  color: var(--primary-color);
+  background: none;
   font-weight: bold;
-  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+  width: 20px;
 }
 
 .checkout-form {
+  gap: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  border-top: 2px solid #f1f3f5;
-  padding-top: 20px;
-}
-
-.checkout-form h4 {
-  margin: 0 0 8px;
+  margin-top: 20px;
 }
 
 .checkout-form input, .checkout-form textarea {
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid #e9ecef;
+  background: #f8f9fa;
   font-size: 14px;
-  outline: none;
-}
-
-.checkout-form input:focus {
-  border-color: var(--primary-color);
 }
 
 .summary {
   display: flex;
   justify-content: space-between;
   font-size: 18px;
-  margin: 12px 0;
+  padding: 10px 0;
 }
 
 .submit-btn {
-  background-color: var(--primary-color);
+  background: #2196f3;
   color: white;
   border: none;
   padding: 16px;
-  border-radius: 16px;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
+  border-radius: 14px;
+  font-weight: 600;
+  width: 100%;
 }
 
 .submit-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+  background: #adb5bd;
 }
 
-.empty-cart {
-  text-align: center;
-  padding: 40px 0;
-  color: var(--text-secondary);
-}
+.empty-cart { text-align: center; padding: 40px 0; }
 </style>

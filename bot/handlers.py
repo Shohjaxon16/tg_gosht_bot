@@ -1,53 +1,65 @@
 import json
 import os
+import logging
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, FSInputFile, InputMediaPhoto
 from aiogram.filters import CommandStart
-from bot.keyboards import get_status_keyboard, get_templates_keyboard, get_webapp_keyboard, get_main_keyboard
+from bot.keyboards import (
+    get_status_keyboard, 
+    get_templates_keyboard, 
+    get_webapp_keyboard, 
+    get_main_keyboard
+)
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    """Start buyrug'i - Media Group va Mini App tugmasini yuboradi"""
-    # Rasmlar yo'llari
+    """Start buyrug'i - Media va Katalog tugmalarini yuboradi"""
     photo1 = FSInputFile("bot/assets/kolbasa.png")
     photo2 = FSInputFile("bot/assets/sosiska.png")
     
-    # Media guruhi
     media = [
-        InputMediaPhoto(media=photo1, caption=f"Assalomu alaykum, {message.from_user.full_name}!\nMuxlisa Food onlayn do'koniga xush kelibsiz.\n\nPastdagi tugma orqali katalogimizni ko'rishingiz mumkin. 👇"),
+        InputMediaPhoto(
+            media=photo1, 
+            caption=f"<b>Assalomu alaykum, {message.from_user.full_name}!</b>\n"
+                    f"Muxlisa Food onlayn do'koniga xush kelibsiz.\n\n"
+                    f"Pastdagi tugmalar orqali katalogimizni ko'rishingiz va buyurtma berishingiz mumkin. 👇"
+        ),
         InputMediaPhoto(media=photo2)
     ]
     
-    # Rasmlarni yuborish
-    await message.answer_media_group(media=media)
-    
-    # Tugmani alohida yuborish (Media guruhi bilan birga tugma yuborib bo'lmaydi)
-    webapp_url = os.getenv("WEBAPP_URL")
-    await message.answer(
-        "Buyurtma berishni boshlash uchun pastdagi **🛍 Do'konni ochish** tugmasini bosing:",
-        reply_markup=get_main_keyboard(webapp_url)
-    )
+    try:
+        await message.answer_media_group(media=media)
+        
+        webapp_url = os.getenv("WEBAPP_URL")
+        await message.answer(
+            "🛍 Buyurtma berishni boshlash uchun pastdagi tugmani bosing:",
+            reply_markup=get_main_keyboard(webapp_url)
+        )
+    except Exception as e:
+        logger.error(f"Error in cmd_start: {e}")
 
 @router.message(F.web_app_data)
 async def handle_webapp_data(message: Message, bot: Bot):
-    """Mini Appdan kelgan buyurtmani qabul qilish va kanalga yuborish"""
+    """Mini Appdan kelgan buyurtmani qayta ishlash"""
     try:
         data = json.loads(message.web_app_data.data)
-        items = data.get('cart', [])
+        items = data.get('items', []) # App.vue dagi nomga moslab
         total = data.get('total', 0)
         
-        # Buyurtma matnini shakllantirish
-        order_text = f"🆕 **Yangi Buyurtma!**\n\n"
-        order_text += f"👤 Mijoz: {message.from_user.full_name}\n"
-        order_text += f"🆔 User ID: `{message.from_user.id}`\n\n"
-        order_text += "🛒 Mahsulotlar:\n"
+        order_text = (
+            f"🆕 <b>Yangi Buyurtma!</b>\n\n"
+            f"👤 <b>Mijoz:</b> {message.from_user.full_name}\n"
+            f"🆔 <b>User ID:</b> <code>{message.from_user.id}</code>\n\n"
+            f"🛒 <b>Mahsulotlar:</b>\n"
+        )
         
         for item in items:
-            order_text += f"- {item['name']} x{item['quantity']} ({item['price']:,} so'm)\n"
+            order_text += f"• {item['name']} x{item['quantity']} - {item['price']:,} so'm\n"
             
-        order_text += f"\n💰 **Jami: {total:,} so'm**"
+        order_text += f"\n💰 <b>Jami: {total:,} so'm</b>"
 
         # Kanalga yuborish
         channel_id = os.getenv("CHANNEL_ID")
@@ -58,15 +70,16 @@ async def handle_webapp_data(message: Message, bot: Bot):
                 reply_markup=get_status_keyboard(message.from_user.id)
             )
             
-        await message.answer("Buyurtmangiz qabul qilindi! Tezz orada aloqaga chiqamiz. ✅")
+        await message.answer("Sizning buyurtmangiz qabul qilindi! ✅\nTez orada aloqaga chiqamiz.")
+        logger.info(f"Order received from {message.from_user.id}")
         
     except Exception as e:
-        print(f"Error handling webapp data: {e}")
-        await message.answer("Buyurtmani qayta ishlashda xatolik yuz berdi. ❌")
+        logger.error(f"Error handling webapp data: {e}")
+        await message.answer("⚠️ Buyurtmani qayta ishlashda xatolik yuz berdi.")
 
 @router.callback_query(F.data.startswith("status_select:"))
 async def select_status(callback: CallbackQuery):
-    """Admin holatni tanlashi uchun shablonlarni ko'rsatish"""
+    """Status tanlash menyusini ko'rsatish"""
     user_id = callback.data.split(":")[1]
     await callback.message.edit_reply_markup(
         reply_markup=get_templates_keyboard(user_id)
@@ -75,32 +88,30 @@ async def select_status(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("send_status:"))
 async def send_status_to_user(callback: CallbackQuery, bot: Bot):
-    """Tanlangan shablonni mijozga yuborish"""
+    """Mijozga holat xabarini yuborish"""
     _, user_id, status_code = callback.data.split(":")
     
     status_messages = {
         "accepted": "✅ Buyurtmangiz qabul qilindi.",
         "preparing": "👨‍🍳 Taomingiz tayyorlanmoqda.",
-        "on_the_way": "🚚 Buyurtma yo'lda, kuryerimiz yaqinlashmoqda.",
-        "delivered": "📦 Buyurtma yetkazib berildi. Yoqimli ishtaha!"
+        "on_the_way": "🚚 Buyurtma yo'lda.",
+        "delivered": "📦 Buyurtma yetkazildi. Yoqimli ishtaha!"
     }
     
     msg_text = status_messages.get(status_code, "Holat yangilandi.")
     
     try:
         await bot.send_message(chat_id=user_id, text=msg_text)
-        await callback.answer(f"Xabar mijozga yuborildi! ✅", show_alert=True)
-        # Kanalda tugmani qayta tiklash
+        await callback.answer("Mijozga yuborildi! ✅", show_alert=True)
+        # Tugmani qayta tiklash
         await callback.message.edit_reply_markup(
             reply_markup=get_status_keyboard(user_id)
         )
     except Exception as e:
-        await callback.answer(f"Xatolik: Mijozga yozib bo'lmadi. ❌", show_alert=True)
+        logger.error(f"Error sending status to user {user_id}: {e}")
+        await callback.answer("Xatolik: Mijozga yozib bo'lmadi. ❌", show_alert=True)
 
 @router.callback_query(F.data == "cancel_select")
 async def cancel_selection(callback: CallbackQuery):
     """Tanlovni bekor qilish"""
-    # Bu yerda user_id ni callback_query xabaridan olish qiyinroq bo'lishi mumkin 
-    # shuning uchun callback_data da saqlagan ma'qul edi. 
-    # Hozircha shunchaki yopamiz.
-    await callback.answer("Bekor qilindi.")
+    await callback.answer("Amal bekor qilindi.")
