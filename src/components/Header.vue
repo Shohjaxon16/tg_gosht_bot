@@ -9,7 +9,7 @@
       </div>
       <div class="shop-info">
         <h1>MUXLISA FOOD</h1>
-        <p>bot</p>
+        <p>Onlayn buyurtma</p>
       </div>
     </div>
     <div class="lang-selector">
