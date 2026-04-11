@@ -97,7 +97,8 @@ const submitOrder = () => {
     user: {
       name: name.value,
       phone: '+998' + phone.value,
-      address: address.value
+      address: address.value,
+      coords: lastPlacemark ? lastPlacemark.geometry.getCoordinates() : null
     },
     items: props.cart,
     total: props.total

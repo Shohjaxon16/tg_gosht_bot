@@ -28,11 +28,16 @@ def get_status_keyboard(user_id):
     ])
 
 def get_templates_keyboard(user_id):
-    """Status shablonlari menyusi"""
+    """Status shablonlari menyusi (2x2 Grid)"""
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✅ Qabul qilindi", callback_data=f"send_status:{user_id}:accepted")],
-        [InlineKeyboardButton(text="👨‍🍳 Tayyorlanmoqda", callback_data=f"send_status:{user_id}:preparing")],
-        [InlineKeyboardButton(text="🚚 Yo'lda", callback_data=f"send_status:{user_id}:on_the_way")],
-        [InlineKeyboardButton(text="📦 Yetkazildi", callback_data=f"send_status:{user_id}:delivered")],
-        [InlineKeyboardButton(text="❌ Bekor qilish", callback_data="cancel_select")]
+        [
+            InlineKeyboardButton(text="✅ Qabul qilindi", callback_data=f"send_status:{user_id}:accepted"),
+            InlineKeyboardButton(text="👨‍🍳 Tayyorlanmoqda", callback_data=f"send_status:{user_id}:preparing")
+        ],
+        [
+            InlineKeyboardButton(text="🚚 Yo'lda", callback_data=f"send_status:{user_id}:on_the_way"),
+            InlineKeyboardButton(text="📦 Yetkazildi", callback_data=f"send_status:{user_id}:delivered")
+        ],
+        [InlineKeyboardButton(text="❌ Bekor qilish", callback_data=f"send_status:{user_id}:cancelled")],
+        [InlineKeyboardButton(text="🔼 Menyuni yopish", callback_data=f"status_close:{user_id}")]
     ])
