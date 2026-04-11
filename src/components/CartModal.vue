@@ -18,10 +18,7 @@ const isFormValid = computed(() => {
 })
 
 const submitOrder = () => {
-  if (!isFormValid.value) {
-    alert("Iltimos, barcha maydonlarni to'g'ri to'ldiring: Ism (2ta belgi), Telefon (5ta raqam), Manzil (3ta belgi)")
-    return
-  }
+  if (!isFormValid.value) return
   
   const orderData = {
     user: {
@@ -33,7 +30,6 @@ const submitOrder = () => {
     total: props.total
   }
   
-  alert("Buyurtma yuborilmoqda...")
   emit('checkout', orderData)
 }
 </script>
