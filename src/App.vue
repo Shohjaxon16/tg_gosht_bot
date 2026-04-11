@@ -48,11 +48,12 @@ const updateQuantity = (id, delta) => {
 
 const handleCheckout = (orderData) => {
   if (window.Telegram?.WebApp) {
+    alert("Telegram WebApp aniqlandi. Buyurtma botga yuborilmoqda...")
     // Send data to bot and close Mini App
     window.Telegram.WebApp.sendData(JSON.stringify(orderData))
   } else {
     console.log("Order Data:", orderData)
-    alert("Buyurtmangiz qabul qilindi (Demo modeda)")
+    alert("Telegram WebApp topilmadi. Buyurtmangiz qabul qilindi (Demo modeda)")
   }
 }
 
