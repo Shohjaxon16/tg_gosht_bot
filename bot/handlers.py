@@ -3,7 +3,7 @@ import os
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, FSInputFile, InputMediaPhoto
 from aiogram.filters import CommandStart
-from bot.keyboards import get_status_keyboard, get_templates_keyboard, get_webapp_keyboard
+from bot.keyboards import get_status_keyboard, get_templates_keyboard, get_webapp_keyboard, get_main_keyboard
 
 router = Router()
 
@@ -26,8 +26,8 @@ async def cmd_start(message: Message):
     # Tugmani alohida yuborish (Media guruhi bilan birga tugma yuborib bo'lmaydi)
     webapp_url = os.getenv("WEBAPP_URL")
     await message.answer(
-        "Buyurtma berishni boshlang:",
-        reply_markup=get_webapp_keyboard(webapp_url)
+        "Buyurtma berishni boshlash uchun pastdagi **🛍 Do'konni ochish** tugmasini bosing:",
+        reply_markup=get_main_keyboard(webapp_url)
     )
 
 @router.message(F.web_app_data)

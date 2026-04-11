@@ -14,7 +14,7 @@ const phone = ref('')
 const address = ref('')
 
 const isFormValid = computed(() => {
-  return name.value.length > 2 && phone.value.length > 7 && address.value.length > 5
+  return name.value.length >= 2 && phone.value.length >= 5 && address.value.length >= 3
 })
 
 const submitOrder = () => {

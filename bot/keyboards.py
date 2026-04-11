@@ -1,7 +1,7 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, KeyboardButton
 
 def get_webapp_keyboard(url):
-    """Mini Appni ochish uchun tugma"""
+    """Mini Appni ochish uchun Inline tugma (Xabar tagida)"""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(
@@ -10,6 +10,21 @@ def get_webapp_keyboard(url):
             )
         ]
     ])
+    return keyboard
+
+def get_main_keyboard(url):
+    """Mini Appni ochish uchun Reply tugma (Pastki menyuda) - Buyurtma yuborish uchun shart!"""
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [
+                KeyboardButton(
+                    text="🛍 Do'konni ochish",
+                    web_app=WebAppInfo(url=url)
+                )
+            ]
+        ],
+        resize_keyboard=True
+    )
     return keyboard
 
 def get_status_keyboard(user_id):
