@@ -7,8 +7,6 @@ import BottomCart from './components/BottomCart.vue'
 import CartModal from './components/CartModal.vue'
 import { products as initialProducts } from './data/products'
 
-const categories = ['SOMSA', 'LAVASH', 'SHOURMA', 'BURGER']
-const activeCategory = ref('SOMSA')
 const isCartOpen = ref(false)
 const products = ref(initialProducts)
 const cart = ref([])
@@ -19,7 +17,7 @@ const getCartQuantity = (productId) => {
 }
 
 const filteredProducts = computed(() => {
-  return products.value.filter(p => p.category === activeCategory.value)
+  return products.value
 })
 
 const cartTotal = computed(() => {
@@ -76,12 +74,7 @@ onMounted(() => {
     <Header />
     
     <main>
-      <CategoryTabs 
-        :categories="categories" 
-        v-model="activeCategory" 
-      />
-      
-      <div class="products-grid">
+      <div class="products-list">
         <ProductCard 
           v-for="product in filteredProducts" 
           :key="product.id" 
@@ -126,10 +119,10 @@ main {
   padding: 16px;
 }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.products-list {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 </style>
