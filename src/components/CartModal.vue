@@ -12,13 +12,13 @@ const emit = defineEmits(['close', 'update-quantity', 'checkout'])
 const name = ref('')
 const phone = ref('') // Faqat 9 ta raqam uchun
 const address = ref('')
-const isMapOpen = ref(false)
 const mapContainer = ref(null)
 let ymapsInstance = null
 let mapObject = null
 let lastPlacemark = null
+const DELIVERY_FEE = 15000
 
-// Telefon raqamini faqat raqamlardan iborat qilish va 9 tadan oshirmaslik
+// Telefon raqamini faqat raqamlardan iborat qilib, 9 xonagacha ishlash
 const handlePhoneInput = (e) => {
   const value = e.target.value.replace(/\D/g, '')
   phone.value = value.slice(0, 9)
@@ -27,14 +27,6 @@ const handlePhoneInput = (e) => {
 const isFormValid = computed(() => {
   return name.value.length >= 2 && phone.value.length === 9 && address.value.length >= 3
 })
-
-const openMap = () => {
-  isMapOpen.value = true
-  // Yandex Maps kutubxonasi yuklanganini tekshirish
-  if (window.ymaps) {
-    window.ymaps.ready(initMap)
-  }
-}
 
 const initMap = () => {
   if (mapObject) return
@@ -86,10 +78,6 @@ const getAddress = (coords) => {
   })
 }
 
-const closeMap = () => {
-  isMapOpen.value = false
-}
-
 const submitOrder = () => {
   if (!isFormValid.value) return
   
@@ -101,16 +89,20 @@ const submitOrder = () => {
       coords: lastPlacemark ? lastPlacemark.geometry.getCoordinates() : null
     },
     items: props.cart,
-    total: props.total
+    total: props.total + DELIVERY_FEE
   }
   
   emit('checkout', orderData)
 }
 
-// Modal yopilganda xaritani tozalash (ixtiyoriy)
 watch(() => props.isOpen, (newVal) => {
-  if (!newVal) {
-    isMapOpen.value = false
+  if (newVal) {
+    // Modal ochilganda xaritani darxol ishga tushiramiz
+    setTimeout(() => {
+      if (window.ymaps) {
+        window.ymaps.ready(initMap)
+      }
+    }, 100)
   }
 })
 </script>
@@ -143,7 +135,18 @@ watch(() => props.isOpen, (newVal) => {
       </div>
 
       <div class="checkout-form" v-if="cart.length > 0">
-        <h4>Ma'lumotlar:</h4>
+        
+        <!-- Xarita to'g'ridan to'g'ri forma ichida -->
+        <div class="inline-map-wrapper">
+          <div id="yandex-map" class="inline-map"></div>
+        </div>
+
+        <div class="address-wrapper">
+          <span class="field-label">Manzil *</span>
+          <textarea v-model="address" placeholder="Yetkazib berish manzili avtomatik yoziladi..."></textarea>
+        </div>
+
+        <span class="field-label">Ma'lumotlar</span>
         <input v-model="name" type="text" placeholder="Ismingiz" />
         
         <div class="phone-input-wrapper">
@@ -156,38 +159,33 @@ watch(() => props.isOpen, (newVal) => {
             maxlength="9"
           />
         </div>
-
-        <div class="address-wrapper">
-          <textarea v-model="address" placeholder="Yetkazib berish manzili"></textarea>
-          <button class="map-btn" @click="openMap">
-            📍 Xaritadan belgilash
+        
+        <div class="summary-box">
+          <div class="summary-line">
+            <span>Mahsulotlar</span>
+            <span>{{ total.toLocaleString() }} so'm</span>
+          </div>
+          <div class="summary-line">
+            <span>Yetkazib berish</span>
+            <span>{{ DELIVERY_FEE.toLocaleString() }} so'm</span>
+          </div>
+          <div class="summary-line total-line">
+            <span>Jami</span>
+            <span>{{ (total + DELIVERY_FEE).toLocaleString() }} so'm</span>
+          </div>
+        </div>
+        
+        <div class="bottom-checkout">
+          <div class="bottom-total">{{ (total + DELIVERY_FEE).toLocaleString() }} so'm</div>
+          <button 
+            class="submit-btn" 
+            :disabled="!isFormValid"
+            @click="submitOrder"
+          >
+            Rasmiylashtirish
           </button>
         </div>
-        
-        <div class="summary">
-          <span>Jami:</span>
-          <strong>{{ total.toLocaleString() }} so'm</strong>
-        </div>
-        
-        <button 
-          class="submit-btn" 
-          :disabled="!isFormValid"
-          @click="submitOrder"
-        >
-          Buyurtmani tasdiqlash
-        </button>
       </div>
-    </div>
-
-    <!-- Yandex Map Fullscreen Modal -->
-    <div v-if="isMapOpen" class="map-modal">
-      <div class="map-header">
-        <button class="back-btn" @click="closeMap">← Orqaga</button>
-        <span>Joylashuvni belgilang</span>
-        <button class="done-btn" @click="closeMap">Tayyor</button>
-      </div>
-      <div id="yandex-map" class="map-view"></div>
-      <div class="map-hint">Markerni kerakli joyga suring</div>
     </div>
   </div>
 </template>
@@ -311,78 +309,77 @@ watch(() => props.isOpen, (newVal) => {
   gap: 8px;
 }
 
-.map-btn {
-  background: #e3f2fd;
-  color: #2196f3;
-  border: none;
-  padding: 10px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 14px;
+.inline-map-wrapper {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 15px;
 }
 
-.summary {
+.inline-map {
+  width: 100%;
+  height: 100%;
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-color);
+  margin-bottom: -5px;
+}
+
+.summary-box {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.summary-line {
   display: flex;
   justify-content: space-between;
+  font-size: 14px;
+  color: #495057;
+}
+
+.total-line {
+  margin-top: 5px;
+  padding-top: 10px;
+  border-top: 1px solid #e9ecef;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-color);
+}
+
+.bottom-checkout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 15px;
+}
+
+.bottom-total {
   font-size: 18px;
-  padding: 10px 0;
-  border-top: 1px solid #eee;
+  font-weight: bold;
 }
 
 .submit-btn {
-  background: #2196f3;
+  background: #eb4034; /* tugmalarni qizilga moslash */
   color: white;
   border: none;
-  padding: 16px;
-  border-radius: 14px;
+  padding: 14px 24px;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 16px;
+  flex: 1;
 }
 
 .submit-btn:disabled {
   background: #adb5bd;
-}
-
-/* Map Modal Styles */
-.map-modal {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: white;
-  z-index: 2000;
-  display: flex;
-  flex-direction: column;
-}
-
-.map-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  background: white;
-}
-
-.back-btn, .done-btn {
-  background: none; border: none;
-  font-weight: 600; font-size: 16px;
-  color: #2196f3;
-}
-
-.map-view {
-  flex: 1;
-  width: 100%;
-}
-
-.map-hint {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.7);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  pointer-events: none;
 }
 </style>

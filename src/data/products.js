@@ -1,17 +1,17 @@
 export const products = [
   { 
     id: 1, 
-    name: "MAXAM KOLBASA", 
-    price: 65000, 
-    category: 'KOLBASALAR', 
-    image: '/kolbasa.png' 
+    name: "GO'SHTLI", 
+    price: 12000, 
+    category: 'SOMSA', 
+    image: 'https://cp.lider-food.uz/uploads/products/12/12_1623321600.jpg' 
   },
   { 
     id: 2, 
-    name: "HALOL SOSISKA", 
-    price: 45000, 
-    category: 'KOLBASALAR', 
-    image: '/sosiska.png' 
+    name: "GO'SHTLI SIRLI", 
+    price: 12000, 
+    category: 'SOMSA', 
+    image: 'https://cp.lider-food.uz/uploads/products/12/12_1623321600.jpg' 
   },
   { 
     id: 3, 

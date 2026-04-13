@@ -1,20 +1,29 @@
 <script setup>
 defineProps({
-  product: Object
+  product: Object,
+  quantity: {
+    type: Number,
+    default: 0
+  }
 })
-defineEmits(['add'])
+defineEmits(['add', 'update'])
 </script>
 
 <template>
   <div class="product-card fade-in">
     <div class="image-wrapper">
       <img :src="product.image" :alt="product.name" />
-      <button class="add-btn" @click="$emit('add', product)">
+      <button v-if="quantity === 0" class="add-btn" @click="$emit('add', product)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </button>
+      <div v-else class="card-quantity-controls">
+        <button @click="$emit('update', product.id, -1)">-</button>
+        <span>{{ quantity }}</span>
+        <button @click="$emit('update', product.id, 1)">+</button>
+      </div>
     </div>
     <div class="info">
       <p class="price">{{ product.price.toLocaleString() }} so'm</p>
@@ -74,6 +83,37 @@ defineEmits(['add'])
 .add-btn svg {
   width: 16px;
   height: 16px;
+}
+
+.card-quantity-controls {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card-quantity-controls button {
+  border: none;
+  background: none;
+  font-weight: bold;
+  font-size: 16px;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.card-quantity-controls span {
+  font-size: 14px;
+  font-weight: bold;
+  min-width: 16px;
+  text-align: center;
 }
 
 .info {

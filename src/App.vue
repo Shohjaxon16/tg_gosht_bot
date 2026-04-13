@@ -7,11 +7,16 @@ import BottomCart from './components/BottomCart.vue'
 import CartModal from './components/CartModal.vue'
 import { products as initialProducts } from './data/products'
 
-const categories = ['KOLBASALAR', 'LAVASH', 'SHOURMA', 'BURGER']
-const activeCategory = ref('KOLBASALAR')
+const categories = ['SOMSA', 'LAVASH', 'SHOURMA', 'BURGER']
+const activeCategory = ref('SOMSA')
 const isCartOpen = ref(false)
 const products = ref(initialProducts)
 const cart = ref([])
+
+const getCartQuantity = (productId) => {
+  const item = cart.value.find(p => p.id === productId)
+  return item ? item.quantity : 0
+}
 
 const filteredProducts = computed(() => {
   return products.value.filter(p => p.category === activeCategory.value)
@@ -81,7 +86,9 @@ onMounted(() => {
           v-for="product in filteredProducts" 
           :key="product.id" 
           :product="product"
+          :quantity="getCartQuantity(product.id)"
           @add="addToCart"
+          @update="updateQuantity"
         />
       </div>
     </main>
