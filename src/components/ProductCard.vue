@@ -31,6 +31,7 @@ defineEmits(['add'])
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
+  min-width: 0; /* Grid blowoutni oldini oladi */
 }
 
 .image-wrapper {
@@ -77,6 +78,7 @@ defineEmits(['add'])
 
 .info {
   padding: 12px;
+  min-width: 0;
 }
 
 .price {
@@ -84,6 +86,7 @@ defineEmits(['add'])
   font-size: 14px;
   font-weight: 700;
   color: var(--text-color);
+  white-space: nowrap;
 }
 
 .name {
@@ -92,5 +95,7 @@ defineEmits(['add'])
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 </style>

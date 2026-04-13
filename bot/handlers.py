@@ -19,7 +19,8 @@ router = Router()
 async def cmd_start(message: Message):
     """Start buyrug'i - Media va Katalog tugmalarini yuboradi"""
     try:
-        webapp_url = os.getenv("WEBAPP_URL")
+        # Telgram keshini tozalash uchun urlga tasodifiy kesh-buster qoshamiz
+        webapp_url = os.getenv("WEBAPP_URL").rstrip('/') + '/?v=4'
         await message.answer(
             f"<b>Assalomu alaykum, {message.from_user.full_name}!</b>\n"
             f"Muxlisa Food onlayn do'koniga xush kelibsiz.\n\n"
