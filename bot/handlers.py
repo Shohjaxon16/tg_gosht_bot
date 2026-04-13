@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import asyncio
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, FSInputFile, InputMediaPhoto
 from aiogram.filters import CommandStart
@@ -17,25 +18,12 @@ router = Router()
 @router.message(CommandStart())
 async def cmd_start(message: Message):
     """Start buyrug'i - Media va Katalog tugmalarini yuboradi"""
-    photo1 = FSInputFile("bot/assets/kolbasa.png")
-    photo2 = FSInputFile("bot/assets/sosiska.png")
-    
-    media = [
-        InputMediaPhoto(
-            media=photo1, 
-            caption=f"<b>Assalomu alaykum, {message.from_user.full_name}!</b>\n"
-                    f"Muxlisa Food onlayn do'koniga xush kelibsiz.\n\n"
-                    f"Pastdagi tugmalar orqali katalogimizni ko'rishingiz va buyurtma berishingiz mumkin. 👇"
-        ),
-        InputMediaPhoto(media=photo2)
-    ]
-    
     try:
-        await message.answer_media_group(media=media)
-        
         webapp_url = os.getenv("WEBAPP_URL")
         await message.answer(
-            "🛍 Buyurtma berishni boshlash uchun pastdagi tugmani bosing:",
+            f"<b>Assalomu alaykum, {message.from_user.full_name}!</b>\n"
+            f"Muxlisa Food onlayn do'koniga xush kelibsiz.\n\n"
+            f"🛍 Buyurtma berishni boshlash uchun pastdagi tugmani bosing 👇",
             reply_markup=get_main_keyboard(webapp_url)
         )
     except Exception as e:
@@ -87,15 +75,19 @@ async def handle_webapp_data(message: Message, bot: Bot):
             total_fmt = str(total)
         order_text += f"\n💰 <b>Jami: {total_fmt} so'm</b>"
 
+        # Foydalanuvchiga darhol javob berish (bot tezroq ishlashi uchun)
+        await message.answer("Sizning buyurtmangiz qabul qilindi! ✅\nTez orada aloqaga chiqamiz.")
+
+        # Kanalga xabarni fonda yuborish (asiynxron tarzda kechiktirmasdan)
         channel_id = os.getenv("CHANNEL_ID")
         if channel_id:
-            await bot.send_message(
-                chat_id=channel_id,
-                text=order_text,
-                reply_markup=get_status_keyboard(message.from_user.id)
+            asyncio.create_task(
+                bot.send_message(
+                    chat_id=channel_id,
+                    text=order_text,
+                    reply_markup=get_status_keyboard(message.from_user.id)
+                )
             )
-            
-        await message.answer("Sizning buyurtmangiz qabul qilindi! ✅\nTez orada aloqaga chiqamiz.")
         
     except Exception as e:
         logger.error(f"Error in handle_webapp_data: {e}", exc_info=True)

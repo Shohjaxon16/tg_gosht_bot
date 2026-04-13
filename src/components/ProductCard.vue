@@ -42,7 +42,9 @@ defineEmits(['add'])
 .image-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* cover o'rniga contain yozildi, shunda rasm kesilmay to'liq ko'rinadi */
+  padding: 8px; /* rasmlar chetga yopishib qolmasligi uchun ozgina joy qoldirdik */
+  background-color: #ffffff; /* Orqa fonni oq qildik, shaffof (PNG) rasmlar chiroyli chiqishi uchun */
 }
 
 .add-btn {
