@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import Header from './components/Header.vue'
-import CategoryTabs from './components/CategoryTabs.vue'
 import ProductCard from './components/ProductCard.vue'
 import BottomCart from './components/BottomCart.vue'
 import CartModal from './components/CartModal.vue'
